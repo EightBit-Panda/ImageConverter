@@ -61,7 +61,7 @@ ARCH="$(uname -m)"
 if [[ "$ARCH" != "x86_64" ]]; then
   echo "WARNING: This script is intended for x86_64. Current architecture: $ARCH"
 fi
-appimagetool "$APPDIR" "$PWD/ImageConverter-x86_64.AppImage"
+ARCH=x86_64 appimagetool "$APPDIR" "$PWD/ImageConverter-x86_64.AppImage"
 echo
 echo "Created: $PWD/ImageConverter-x86_64.AppImage"
 echo "Test the AppImage on a clean Ubuntu/Linux Mint system before publishing it."
