@@ -1,0 +1,1 @@
+Before publishing this project publicly, choose and add a license (for example, MIT) only if you are comfortable granting those permissions. Do not claim a license until you have deliberately selected one.
