@@ -5,12 +5,16 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'ImageConverter_Linux_Test/**'
+      - '*.py'
+      - '*.sh'
+      - '*.txt'
+      - '*.png'
       - '.github/workflows/build-linux-appimage.yml'
 
 jobs:
   build-appimage:
     runs-on: ubuntu-22.04
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -27,7 +31,6 @@ jobs:
           sudo mv appimagetool.AppImage /usr/local/bin/appimagetool
 
       - name: Build AppImage
-        working-directory: ImageConverter_Linux_Test
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
         run: |
@@ -38,6 +41,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ImageConverter-Linux-x86_64
-          path: ImageConverter_Linux_Test/ImageConverter-x86_64.AppImage
+          path: ImageConverter-x86_64.AppImage
           if-no-files-found: error
           retention-days: 14
