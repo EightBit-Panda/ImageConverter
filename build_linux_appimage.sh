@@ -36,6 +36,7 @@ rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 cp -a "$DIST_DIR/." "$APPDIR/usr/bin/"
 cp image-converter.png "$APPDIR/usr/share/icons/hicolor/256x256/apps/image-converter.png"
+cp image-converter.png "$APPDIR/image-converter.png"
 
 cat > "$APPDIR/AppRun" <<'RUNNER'
 #!/usr/bin/env bash
