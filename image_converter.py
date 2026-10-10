@@ -1,4 +1,4 @@
-eimport tkinter as tk
+import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 
