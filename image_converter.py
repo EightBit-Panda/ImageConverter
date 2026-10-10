@@ -1,4 +1,4 @@
-import tkinter as tk
+eimport tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 
@@ -189,11 +189,62 @@ class ImageConverter:
         tk.Button(buttons, text="Clear List", command=self.clear_files,
                   font=("Segoe UI", 10), padx=15, pady=7).pack(side="left")
 
-        # Keep the options panel at a comfortable width, but let its height
-        # follow its contents instead of clipping controls on Linux desktops.
-        right = tk.Frame(main, width=310)
-        right.pack(side="right", anchor="n", padx=(10, 0), fill="y")
+        # Scrollable right-hand panel: keeps all controls reachable on short
+        # screens, including when the window is maximized on Linux Mint.
+        right_shell = tk.Frame(main, width=330)
+        right_shell.pack(side="right", fill="y", padx=(10, 0))
+        right_shell.pack_propagate(False)
+
+        right_canvas = tk.Canvas(
+            right_shell, width=310, highlightthickness=0, bd=0,
+            background="#111827"
+        )
+        right_scrollbar = ttk.Scrollbar(
+            right_shell, orient="vertical", command=right_canvas.yview
+        )
+        right_canvas.configure(yscrollcommand=right_scrollbar.set)
+        right_scrollbar.pack(side="right", fill="y")
+        right_canvas.pack(side="left", fill="both", expand=True)
+
+        right = tk.Frame(right_canvas, width=310)
+        right_window = right_canvas.create_window(
+            (0, 0), window=right, anchor="nw", width=310
+        )
         right.grid_columnconfigure(0, weight=1)
+
+        def update_scroll_region(_event=None):
+            right_canvas.configure(scrollregion=right_canvas.bbox("all"))
+
+        def fit_scrollable_width(event):
+            right_canvas.itemconfigure(right_window, width=event.width)
+
+        right.bind("<Configure>", update_scroll_region)
+        right_canvas.bind("<Configure>", fit_scrollable_width)
+
+        # Support mouse-wheel scrolling on Windows, macOS and Linux Mint.
+        # The wheel only scrolls this panel when the pointer is over it.
+        def scroll_right_panel(event):
+            widget = event.widget
+            in_right_panel = False
+            while widget is not None:
+                if widget == right_shell:
+                    in_right_panel = True
+                    break
+                widget = getattr(widget, "master", None)
+            if not in_right_panel:
+                return
+
+            if getattr(event, "num", None) == 4:
+                right_canvas.yview_scroll(-3, "units")
+            elif getattr(event, "num", None) == 5:
+                right_canvas.yview_scroll(3, "units")
+            elif getattr(event, "delta", 0):
+                direction = -1 if event.delta > 0 else 1
+                right_canvas.yview_scroll(direction * 3, "units")
+
+        right_canvas.bind_all("<MouseWheel>", scroll_right_panel, add="+")
+        right_canvas.bind_all("<Button-4>", scroll_right_panel, add="+")
+        right_canvas.bind_all("<Button-5>", scroll_right_panel, add="+")
 
         tk.Label(
             right, text="Preview",
