@@ -40,8 +40,9 @@ class ImageConverter:
     def __init__(self, root):
         self.root = root
         self.root.title("Image Converter v4.5 – Modern Dark")
-        self.root.geometry("900x820")
-        self.root.minsize(800, 760)
+        # Use a more flexible default/minimum size for Linux desktop displays.
+        self.root.geometry("1000x700")
+        self.root.minsize(700, 500)
         self.files = []
         self.preview_photo = None
         self.last_output_dir = self.load_settings()
@@ -156,7 +157,6 @@ class ImageConverter:
 
         main = tk.Frame(self.root)
         main.pack(fill="both", expand=True, padx=22)
-        main.pack_propagate(False)
 
         left = tk.Frame(main)
         left.pack(side="left", fill="both", expand=True, padx=(0, 10))
@@ -189,9 +189,10 @@ class ImageConverter:
         tk.Button(buttons, text="Clear List", command=self.clear_files,
                   font=("Segoe UI", 10), padx=15, pady=7).pack(side="left")
 
-        right = tk.Frame(main, width=310, height=690)
-        right.pack(side="right", anchor="n", padx=(10, 0))
-        right.pack_propagate(False)
+        # Keep the options panel at a comfortable width, but let its height
+        # follow its contents instead of clipping controls on Linux desktops.
+        right = tk.Frame(main, width=310)
+        right.pack(side="right", anchor="n", padx=(10, 0), fill="y")
         right.grid_columnconfigure(0, weight=1)
 
         tk.Label(
