@@ -32,7 +32,9 @@ try:
 except ImportError:
     DND_AVAILABLE = False
 
-SUPPORTED = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif", ".avif", ".svg", ".heic", ".heif", ".ico"}
+SUPPORTED = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif",
+             ".tiff", ".gif", ".avif", ".svg", ".heic", ".heif", ".ico"}
+
 
 class ImageConverter:
     SETTINGS_FILE = Path.home() / ".image_converter_settings.json"
@@ -109,7 +111,8 @@ class ImageConverter:
                     widget.configure(bg=c["input"], highlightbackground=c["border"],
                                      highlightcolor=c["accent"], relief="flat", bd=1)
                 elif kind == "Button":
-                    is_primary = widget.cget("text").strip().upper() == "KONVERTER"
+                    is_primary = widget.cget(
+                        "text").strip().upper() == "KONVERTER"
                     bg = c["accent"] if is_primary else c["panel_alt"]
                     fg = "#062A27" if is_primary else c["text"]
                     widget.configure(bg=bg, fg=fg, activebackground=c["accent_active"],
@@ -148,7 +151,8 @@ class ImageConverter:
         self.output_label.configure(bg=c["bg"], fg=c["muted"])
 
     def build_ui(self):
-        tk.Label(self.root, text="Image Converter", font=("Segoe UI", 24, "bold")).pack(pady=(18, 2))
+        tk.Label(self.root, text="Image Converter", font=(
+            "Segoe UI", 24, "bold")).pack(pady=(18, 2))
         tk.Label(
             self.root,
             text="Convert images locally on your PC — no uploads to the internet.",
@@ -176,7 +180,8 @@ class ImageConverter:
             self.drop_area.drop_target_register(DND_FILES)
             self.drop_area.dnd_bind("<<Drop>>", self.drop_files)
 
-        self.file_list = tk.Listbox(left, selectmode=tk.EXTENDED, font=("Segoe UI", 10))
+        self.file_list = tk.Listbox(
+            left, selectmode=tk.EXTENDED, font=("Segoe UI", 10))
         self.file_list.pack(fill="both", expand=True)
         self.file_list.bind("<<ListboxSelect>>", self.preview_selected)
 
@@ -280,17 +285,21 @@ class ImageConverter:
         )
         self.progress.grid(row=3, column=0, sticky="ew", pady=(0, 1))
 
-        # Keep status text inside a fixed-height area. Long filenames and
-        # conversion results wrap instead of changing the right panel width.
-        self.status_frame = tk.Frame(right, height=34)
+        # Fixed status area: progress text must not move sections below.
+        self.status_frame = tk.Frame(right, height=42)
         self.status_frame.grid(row=4, column=0, sticky="ew", pady=(0, 5))
         self.status_frame.grid_propagate(False)
+
         self.status_label = tk.Label(
-            self.status_frame, text="Ready — add or drop images",
-            font=("Segoe UI", 8), anchor="nw", justify="left",
-            wraplength=285
+            self.status_frame,
+            text="Ready — add or drop images",
+            font=("Segoe UI", 8),
+            anchor="nw",
+            justify="left",
+            wraplength=285,
+            height=4
         )
-        self.status_label.pack(fill="both", expand=True)
+        self.status_label.pack(fill="both", expand=True, padx=5, pady=3)
 
         options = tk.LabelFrame(
             right, text="Conversion",
@@ -304,15 +313,17 @@ class ImageConverter:
         self.format_var = tk.StringVar(value="PNG")
         self.format_menu = ttk.Combobox(
             row, textvariable=self.format_var,
-            values=["PNG", "JPG", "WEBP", "BMP", "TIFF", "HEIC", "HEIF", "ICO"],
+            values=["PNG", "JPG", "WEBP", "BMP",
+                    "TIFF", "HEIC", "HEIF", "ICO"],
             state="readonly", width=9
         )
         self.format_menu.pack(side="right")
-        self.format_menu.bind("<<ComboboxSelected>>", self.update_quality_state)
+        self.format_menu.bind("<<ComboboxSelected>>",
+                              self.update_quality_state)
 
         row2 = tk.Frame(options)
         row2.pack(fill="x", padx=10, pady=(2, 5))
-        self.quality_label = tk.Label(row2, text="Quality (JPG/WebP):", width=25, anchor="w")
+        self.quality_label = tk.Label(row2, text="Quality (JPG/WebP):")
         self.quality_label.pack(side="left")
         self.quality_var = tk.StringVar(value="High")
         self.quality_menu = ttk.Combobox(
@@ -362,7 +373,8 @@ class ImageConverter:
         self.dpi_row.pack(fill="x", padx=10, pady=(1, 2))
         tk.Label(self.dpi_row, text="Print resolution (DPI):").pack(side="left")
         self.dpi_var = tk.StringVar(value="300")
-        self.dpi_entry = tk.Entry(self.dpi_row, width=7, textvariable=self.dpi_var, state="disabled")
+        self.dpi_entry = tk.Entry(
+            self.dpi_row, width=7, textvariable=self.dpi_var, state="disabled")
         self.dpi_entry.pack(side="right")
         self.dpi_row.pack_forget()
 
@@ -406,16 +418,11 @@ class ImageConverter:
             font=("Segoe UI", 12, "bold"), padx=20, pady=9
         ).grid(row=8, column=0, sticky="ew", pady=(4, 0))
 
-        # Long output paths must not widen the canvas-embedded settings panel.
-        self.output_frame = tk.Frame(right, height=34)
-        self.output_frame.grid(row=9, column=0, sticky="ew", pady=(3, 0))
-        self.output_frame.grid_propagate(False)
         self.output_label = tk.Label(
-            self.output_frame, text=self.output_display_text(),
-            font=("Segoe UI", 8), anchor="nw", justify="left",
-            wraplength=285
+            right, text=self.output_display_text(),
+            font=("Segoe UI", 8), anchor="w"
         )
-        self.output_label.pack(fill="both", expand=True)
+        self.output_label.grid(row=9, column=0, sticky="ew", pady=(3, 0))
 
         tk.Button(
             right, text="Choose Output Folder",
@@ -432,7 +439,8 @@ class ImageConverter:
     def load_settings(self):
         try:
             if self.SETTINGS_FILE.exists():
-                data = json.loads(self.SETTINGS_FILE.read_text(encoding="utf-8"))
+                data = json.loads(
+                    self.SETTINGS_FILE.read_text(encoding="utf-8"))
                 return data.get("output_dir", "")
         except Exception:
             pass
@@ -535,14 +543,16 @@ class ImageConverter:
                 capture_output=True, text=True, timeout=300
             )
             if result.returncode != 0:
-                details = (result.stderr or result.stdout or "Ukjent feil").strip()
+                details = (
+                    result.stderr or result.stdout or "Ukjent feil").strip()
                 messagebox.showerror(
                     "Installasjonen mislyktes",
                     "Could not install SVG support automatically.\n\n"
                     "Try this in PowerShell: python -m pip install resvg_py\n\n"
                     + details[-1800:]
                 )
-                self.status_label.configure(text="SVG support could not be installed")
+                self.status_label.configure(
+                    text="SVG support could not be installed")
                 self.info_label.configure(text="SVG support is missing.")
                 return False
 
@@ -557,7 +567,8 @@ class ImageConverter:
                 f"Detaljer: {e}"
             )
             self.status_label.configure(text="SVG support could not be loaded")
-            self.info_label.configure(text="SVG support is missing or could not be loaded.")
+            self.info_label.configure(
+                text="SVG support is missing or could not be loaded.")
             return False
 
     def preview_selected(self, event=None):
@@ -622,7 +633,8 @@ class ImageConverter:
     def update_quality_state(self, event=None):
         """Enable the quality selector only for formats that use it."""
         uses_quality = self.format_var.get().upper() in ("JPG", "WEBP", "HEIC", "HEIF")
-        self.quality_menu.configure(state="readonly" if uses_quality else "disabled")
+        self.quality_menu.configure(
+            state="readonly" if uses_quality else "disabled")
         self.quality_label.configure(
             text="Quality (JPG/WebP/HEIC/HEIF):" if uses_quality else "Quality (not used):"
         )
@@ -631,10 +643,12 @@ class ImageConverter:
         state = "normal" if self.resize_var.get() else "disabled"
         self.width_entry.configure(state=state)
         self.height_entry.configure(state=state)
-        self.resize_mode_menu.configure(state="readonly" if self.resize_var.get() else "disabled")
+        self.resize_mode_menu.configure(
+            state="readonly" if self.resize_var.get() else "disabled")
         self.keep_ratio_button.configure(state=state)
         if self.resize_var.get() and self.resize_mode.get() == "Centimeters":
-            self.dpi_row.pack(fill="x", padx=10, pady=(1, 2), before=self.keep_ratio_button)
+            self.dpi_row.pack(fill="x", padx=10, pady=(1, 2),
+                              before=self.keep_ratio_button)
             self.dpi_entry.configure(state="normal")
         else:
             self.dpi_row.pack_forget()
@@ -657,13 +671,15 @@ class ImageConverter:
 
     def convert(self):
         if not self.files:
-            messagebox.showwarning("None bilder", "Please add or drop at least one image first.")
+            messagebox.showwarning(
+                "None bilder", "Please add or drop at least one image first.")
             return
 
         if self.last_output_dir and Path(self.last_output_dir).is_dir():
             output_dir = self.last_output_dir
         else:
-            output_dir = filedialog.askdirectory(title="Choose folder for converted images")
+            output_dir = filedialog.askdirectory(
+                title="Choose folder for converted images")
             if not output_dir:
                 return
             self.last_output_dir = output_dir
@@ -674,14 +690,17 @@ class ImageConverter:
         resize_enabled = self.resize_var.get()
 
         try:
-            width_value = float(self.width_entry.get()) if resize_enabled else None
-            height_value = float(self.height_entry.get()) if resize_enabled else None
+            width_value = float(self.width_entry.get()
+                                ) if resize_enabled else None
+            height_value = float(self.height_entry.get()
+                                 ) if resize_enabled else None
             if resize_enabled and (width_value <= 0 or height_value <= 0):
                 raise ValueError
             if resize_enabled and self.resize_mode.get() == "Percent":
                 if width_value > 100 or height_value > 100:
                     raise ValueError
-            dpi_value = float(self.dpi_var.get()) if resize_enabled and self.resize_mode.get() == "Centimeters" else None
+            dpi_value = float(self.dpi_var.get(
+            )) if resize_enabled and self.resize_mode.get() == "Centimeters" else None
             if dpi_value is not None and not (1 <= dpi_value <= 2400):
                 raise ValueError
         except (ValueError, TypeError):
@@ -705,7 +724,8 @@ class ImageConverter:
                         if self.install_svg_support():
                             pass
                         else:
-                            raise RuntimeError("SVG support is missing. Install resvg_py to convert SVG files.")
+                            raise RuntimeError(
+                                "SVG support is missing. Install resvg_py to convert SVG files.")
                     import io
                     svg_png = resvg_py.svg_to_bytes(svg_path=source)
                     image = Image.open(io.BytesIO(svg_png))
@@ -721,7 +741,8 @@ class ImageConverter:
                         height_px = height_value / 2.54 * dpi_value
                         if self.keep_ratio.get():
                             width = max(1, round(width_px))
-                            height = max(1, round(original_height * width / original_width))
+                            height = max(
+                                1, round(original_height * width / original_width))
                         else:
                             width = max(1, round(width_px))
                             height = max(1, round(height_px))
@@ -731,18 +752,22 @@ class ImageConverter:
                             width = max(1, round(original_width * scale))
                             height = max(1, round(original_height * scale))
                         else:
-                            width = max(1, round(original_width * width_value / 100.0))
-                            height = max(1, round(original_height * height_value / 100.0))
+                            width = max(
+                                1, round(original_width * width_value / 100.0))
+                            height = max(
+                                1, round(original_height * height_value / 100.0))
                     else:
                         if self.keep_ratio.get():
                             # Use the width as the starting point and calculate the height automatically.
                             width = max(1, round(width_value))
-                            height = max(1, round(original_height * width / original_width))
+                            height = max(
+                                1, round(original_height * width / original_width))
                         else:
                             width = max(1, round(width_value))
                             height = max(1, round(height_value))
 
-                    image = image.resize((width, height), Image.Resampling.LANCZOS)
+                    image = image.resize(
+                        (width, height), Image.Resampling.LANCZOS)
 
                 # Apply rotation and mirroring.
                 rotation = self.rotation_var.get()
@@ -767,7 +792,8 @@ class ImageConverter:
                     else:
                         image = image.convert("RGB")
 
-                extension = ".jpg" if output_format == "jpg" else (".heic" if output_format == "heic" else f".{output_format}")
+                extension = ".jpg" if output_format == "jpg" else (
+                    ".heic" if output_format == "heic" else f".{output_format}")
                 target = Path(output_dir) / f"{source_path.stem}{extension}"
                 counter = 1
                 original_target = target
@@ -783,19 +809,23 @@ class ImageConverter:
                 quality_values = {"Low": 60, "Medium": 80, "High": 95}
                 quality = quality_values.get(self.quality_var.get(), 95)
                 if output_format == "jpg":
-                    image.save(target, "JPEG", quality=quality, optimize=True, **save_options)
+                    image.save(target, "JPEG", quality=quality,
+                               optimize=True, **save_options)
                 elif output_format == "webp":
                     image.save(target, "WEBP", quality=quality, **save_options)
                 elif output_format in ("heic", "heif"):
-                    image = image.convert("RGB") if image.mode not in ("RGB", "RGBA") else image
+                    image = image.convert("RGB") if image.mode not in (
+                        "RGB", "RGBA") else image
                     image.save(target, "HEIF", quality=quality, **save_options)
                 elif output_format == "ico":
                     image = image.convert("RGBA")
                     max_side = min(image.size)
-                    ico_sizes = [s for s in (16, 32, 48, 64, 128, 256) if s <= max_side]
+                    ico_sizes = [s for s in (
+                        16, 32, 48, 64, 128, 256) if s <= max_side]
                     if not ico_sizes:
                         ico_sizes = [max(1, max_side)]
-                    image.save(target, "ICO", sizes=[(s, s) for s in ico_sizes], **save_options)
+                    image.save(target, "ICO", sizes=[
+                               (s, s) for s in ico_sizes], **save_options)
                 else:
                     image.save(target, output_format.upper(), **save_options)
 
@@ -826,7 +856,8 @@ class ImageConverter:
         if errors:
             result += "\n\nCould not convert:\n" + "\n".join(errors)
         self.progress["value"] = len(self.files)
-        self.status_label.configure(text=f"Done — {converted} of {len(self.files)} converted.")
+        self.status_label.configure(
+            text=f"Done — {converted} of {len(self.files)} converted.")
         messagebox.showinfo("Image Converter", result)
 
     @staticmethod
@@ -838,6 +869,7 @@ class ImageConverter:
         if size < 1024**3:
             return f"{size / 1024**2:.1f} MB"
         return f"{size / 1024**3:.1f} GB"
+
 
 if DND_AVAILABLE:
     root = TkinterDnD.Tk()
