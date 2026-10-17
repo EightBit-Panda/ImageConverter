@@ -280,11 +280,17 @@ class ImageConverter:
         )
         self.progress.grid(row=3, column=0, sticky="ew", pady=(0, 1))
 
+        # Keep status text inside a fixed-height area. Long filenames and
+        # conversion results wrap instead of changing the right panel width.
+        self.status_frame = tk.Frame(right, height=34)
+        self.status_frame.grid(row=4, column=0, sticky="ew", pady=(0, 5))
+        self.status_frame.grid_propagate(False)
         self.status_label = tk.Label(
-            right, text="Ready — add or drop images",
-            font=("Segoe UI", 8), anchor="w"
+            self.status_frame, text="Ready — add or drop images",
+            font=("Segoe UI", 8), anchor="nw", justify="left",
+            wraplength=285
         )
-        self.status_label.grid(row=4, column=0, sticky="ew", pady=(0, 5))
+        self.status_label.pack(fill="both", expand=True)
 
         options = tk.LabelFrame(
             right, text="Conversion",
@@ -306,7 +312,7 @@ class ImageConverter:
 
         row2 = tk.Frame(options)
         row2.pack(fill="x", padx=10, pady=(2, 5))
-        self.quality_label = tk.Label(row2, text="Quality (JPG/WebP):")
+        self.quality_label = tk.Label(row2, text="Quality (JPG/WebP):", width=25, anchor="w")
         self.quality_label.pack(side="left")
         self.quality_var = tk.StringVar(value="High")
         self.quality_menu = ttk.Combobox(
@@ -400,11 +406,16 @@ class ImageConverter:
             font=("Segoe UI", 12, "bold"), padx=20, pady=9
         ).grid(row=8, column=0, sticky="ew", pady=(4, 0))
 
+        # Long output paths must not widen the canvas-embedded settings panel.
+        self.output_frame = tk.Frame(right, height=34)
+        self.output_frame.grid(row=9, column=0, sticky="ew", pady=(3, 0))
+        self.output_frame.grid_propagate(False)
         self.output_label = tk.Label(
-            right, text=self.output_display_text(),
-            font=("Segoe UI", 8), anchor="w"
+            self.output_frame, text=self.output_display_text(),
+            font=("Segoe UI", 8), anchor="nw", justify="left",
+            wraplength=285
         )
-        self.output_label.grid(row=9, column=0, sticky="ew", pady=(3, 0))
+        self.output_label.pack(fill="both", expand=True)
 
         tk.Button(
             right, text="Choose Output Folder",
