@@ -1,0 +1,82 @@
+
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'image_converter.py'
+      - 'requirements.txt'
+      - 'ImageConverterIcon.png'
+      - '.github/workflows/build-windows-exe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Create Windows icon
+        run: |
+          python -c "from PIL import Image; im=Image.open('ImageConverterIcon.png').convert('RGBA'); im.save('ImageConverterIcon.ico', format='ICO', sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])"
+
+      - name: Create version information
+        shell: powershell
+        run: |
+          @'
+          VSVersionInfo(
+            ffi=FixedFileInfo(
+              filevers=(4,5,0,0),
+              prodvers=(4,5,0,0),
+              mask=0x3f,
+              flags=0x0,
+              OS=0x4,
+              fileType=0x1,
+              subtype=0x0,
+              date=(0,0)
+            ),
+            kids=[
+              StringFileInfo([
+                StringTable('040904B0', [
+                  StringStruct('CompanyName', 'EightBit-Panda'),
+                  StringStruct('FileDescription', 'Image Converter'),
+                  StringStruct('FileVersion', '4.5.0'),
+                  StringStruct('InternalName', 'ImageConverter'),
+                  StringStruct('OriginalFilename', 'ImageConverter.exe'),
+                  StringStruct('ProductName', 'Image Converter'),
+                  StringStruct('ProductVersion', '4.5.0'),
+                  StringStruct('LegalCopyright', 'Copyright (c) EightBit-Panda')
+                ])
+              ]),
+              VarFileInfo([VarStruct('Translation', [1033, 1200])])
+            ]
+          )
+          '@ | Set-Content -Encoding ASCII version_info.txt
+
+      - name: Build EXE
+        run: |
+          python -m PyInstaller --clean --noconfirm --onefile --windowed --name ImageConverter --icon ImageConverterIcon.ico --version-file version_info.txt --collect-all tkinterdnd2 --collect-all pillow_avif --collect-all pillow_heif --collect-all resvg_py image_converter.py
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImageConverter-Windows-x64
+          path: dist/ImageConverter.exe
+          if-no-files-found: error
+          retention-days: 14
